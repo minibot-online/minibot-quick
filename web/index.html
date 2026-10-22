@@ -67,7 +67,7 @@ nav .badge{position:absolute;top:2px;left:calc(50% - 22px);background:var(--err)
 #gate img{width:88px;height:88px;border-radius:24px}
 #gate h2{font-size:19px}
 #gate p{color:var(--mut);font-size:13px;text-align:center}
-#gateKey{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:13px 15px;font-size:15px;width:min(320px,88vw);text-align:center}
+#gateKey,#gateAddr{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:13px 15px;font-size:15px;width:min(320px,88vw);text-align:center}
 #gateGo{width:min(320px,88vw);padding:13px;font-size:15px;border-radius:12px;background:var(--pri);color:#fff;font-weight:700}
 .hidden{display:none!important}
 /* توست */
@@ -83,6 +83,7 @@ nav .badge{position:absolute;top:2px;left:calc(50% - 22px);background:var(--err)
   <img src="/icon-192.png" alt="">
   <h2>مینی‌بات کوئیک</h2>
   <p>اپ مدیریت سریع — فقط برای خودم</p>
+  <input id="gateAddr" type="text" placeholder="آدرس سرور (https://…) — اختیاری" dir="ltr">
   <input id="gateKey" type="password" placeholder="کلید مدیریت" autocomplete="off">
   <button id="gateGo">ورود</button>
 </div>
@@ -134,7 +135,8 @@ function toast(msg,err){const t=$("toast");t.textContent=msg;t.classList.toggle(
 function fa(ts){if(!ts)return"—";try{return new Date(ts).toLocaleString("fa-IR")}catch(e){return String(ts)}}
 
 /* ================= وضعیت ================= */
-const SERVER_KEY="mq_server",KEY_PREFIX="mq_key_";
+const SERVER_KEY="mq_server",KEY_PREFIX="mq_key_",BASE_KEY="mq_base";
+let BASE=(localStorage.getItem(BASE_KEY)||"").replace(/\/+$/,"");
 let D={servers:[],users:[],reqs:[],sel:null,health:{}};
 function keyStore(){return KEY_PREFIX+(localStorage.getItem(SERVER_KEY)||"s1")}
 let ADMIN_KEY=localStorage.getItem(keyStore())||"";
@@ -145,10 +147,13 @@ function selUrl(){const s=selServer();return s?s.url:""}
 /* ================= API ================= */
 async function api(path,body,reg){
   const h={"Content-Type":"application/json","x-admin-key":ADMIN_KEY};
+  let target="";
+  if(reg){target=BASE||""}
+  else if(BASE){const s=D.servers.find(x=>x.id===serverSel());target=(s&&s.url)||BASE}
   if(!reg)h["x-server"]=serverSel()||"";
   const opt={headers:h};
   if(body!==undefined){opt.method="POST";opt.body=JSON.stringify(body)}
-  const r=await fetch(path,opt);
+  const r=await fetch(target+path,opt);
   if(r.status===401)throw new Error("کلید مدیریت نادرست است");
   return await r.json().catch(()=>({}));
 }
@@ -156,6 +161,11 @@ const regApi=(p,b)=>api(p,b,true);
 
 /* ================= ورود ================= */
 async function tryKey(k){
+  const ga=($("gateAddr").value||"").trim();
+  if(ga){
+    if(!/^https:\/\/[a-z0-9.-]+/i.test(ga))return toast("آدرس معتبر نیست (با https شروع شود)",1);
+    BASE=ga.replace(/\/+$/,"");localStorage.setItem(BASE_KEY,BASE);
+  }else if(BASE){BASE="";localStorage.removeItem(BASE_KEY)}
   ADMIN_KEY=k.trim();
   $("gateGo").textContent="...";
   try{
@@ -174,6 +184,8 @@ async function tryKey(k){
 }
 $("gateGo").onclick=()=>tryKey($("gateKey").value);
 $("gateKey").addEventListener("keydown",e=>{"Enter"===e.key&&tryKey($("gateKey").value)});
+$("gateAddr").value=BASE||"";
+$("gateAddr").addEventListener("keydown",e=>{"Enter"===e.key&&tryKey($("gateKey").value)});
 
 /* ================= بارگذاری ================= */
 let busy=false;
