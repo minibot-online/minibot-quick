@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MiniBot Quick</string>
+    <string name="splash_tagline">مدیریت سریع ربات شما</string>
+    <string name="loading">در حال اتصال…</string>
+    <string name="error_title">⚠️ اتصال برقرار نشد</string>
+    <string name="error_text">اینترنت خود را بررسی کنید و دوباره تلاش کنید.</string>
+    <string name="retry">تلاش دوباره</string>
+    <string name="no_app">اپلیکیشن مربوطه برای باز کردن این لینک پیدا نشد</string>
+    <string name="download_started">دانلود شروع شد ✓</string>
+    <string name="download_failed">خطا در دانلود فایل</string>
+</resources>

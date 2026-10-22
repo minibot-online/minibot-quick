@@ -3,9 +3,10 @@
   "name": "minibot-quick",
   "main": "worker.js",
   "compatibility_date": "2026-01-01",
+  "workers_dev": true,
   "routes": [{ "pattern": "quick.minibot.online", "custom_domain": true }],
   "assets": {
-    "directory": "./",
+    "directory": "./web",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
