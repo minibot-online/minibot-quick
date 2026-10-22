@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>مینی‌بات کوئیک</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-32.png" type="image/png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0b1220;--card:#121b2e;--card2:#182642;--line:#22345c;--txt:#e8eefc;--mut:#8fa3c8;--pri:#3b82f6;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444;--chip:#1c2c4d}
+body{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:86px}
+button{font-family:inherit;border:none;cursor:pointer}
+.mono{font-family:ui-monospace,Menlo,monospace;direction:ltr}
+/* هدر */
+header{position:sticky;top:0;z-index:50;background:rgba(11,18,32,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
+header h1{font-size:17px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbtn{background:var(--chip);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px}
+.hbtn.on{background:var(--pri);border-color:var(--pri);color:#fff}
+#serverSwitch{background:var(--chip);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;max-width:130px}
+/* بدنه */
+main{padding:16px;max-width:560px;margin:0 auto}
+.tab{display:none;animation:fade .18s}
+.tab.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h3{font-size:14px;margin-bottom:10px;color:var(--mut);font-weight:600}
+.big{font-size:22px;font-weight:700}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spread{justify-content:space-between}
+.mut{color:var(--mut);font-size:12.5px}
+.chip{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11.5px;color:var(--mut);white-space:nowrap}
+.chip.ok{color:#86efac;border-color:#14532d}
+.chip.err{color:#fca5a5;border-color:#7f1d1d}
+.chip.warn{color:#fcd34d;border-color:#78350f}
+.btn{background:var(--pri);color:#fff;border-radius:12px;padding:11px 14px;font-size:14px;font-weight:600;flex:1;min-width:72px;text-align:center}
+.btn.sec{background:var(--chip);color:var(--txt);border:1px solid var(--line)}
+.btn.ok{background:var(--ok)}.btn.warn{background:var(--warn)}.btn.err{background:transparent;color:#fca5a5;border:1px solid var(--err)}
+.btn:active{opacity:.75}
+.empty{text-align:center;color:var(--mut);padding:30px 10px;font-size:14px}
+.srvname{font-weight:700;font-size:15px}
+.bnote{margin-top:6px;font-size:12.5px;color:#a5b8dd;line-height:1.7}
+/* کارت کاربر */
+.ucard .uhead{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.uavatar{width:42px;height:42px;border-radius:12px;object-fit:cover;background:var(--card2);border:1px solid var(--line)}
+.uavatar.letter{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#cfe0ff}
+.uname{font-weight:700;font-size:15px;line-height:1.4}
+.ubtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pill{border-radius:10px;padding:9px 8px;font-size:13px;font-weight:600;text-align:center;border:1px solid var(--line);background:var(--chip);color:var(--txt)}
+.pill.on{background:var(--ok);border-color:var(--ok);color:#04220d}
+.pill:active{opacity:.75}
+/* درخواست */
+.rq .note{background:var(--card2);border-radius:10px;padding:8px 10px;margin-top:8px;font-size:12.5px;color:#c6d4f2;line-height:1.7}
+.rq img{max-width:100%;border-radius:10px;margin-top:8px;border:1px solid var(--line)}
+/* ناوبری پایین */
+nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(11,18,32,.95);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
+nav button{flex:1;background:none;color:var(--mut);font-size:11px;padding:7px 2px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+nav button.on{color:var(--pri);font-weight:700}
+nav .ic{font-size:19px;line-height:1}
+nav .badge{position:absolute;top:2px;left:calc(50% - 22px);background:var(--err);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+/* گیت */
+#gate{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px}
+#gate img{width:88px;height:88px;border-radius:24px}
+#gate h2{font-size:19px}
+#gate p{color:var(--mut);font-size:13px;text-align:center}
+#gateKey{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:13px 15px;font-size:15px;width:min(320px,88vw);text-align:center}
+#gateGo{width:min(320px,88vw);padding:13px;font-size:15px;border-radius:12px;background:var(--pri);color:#fff;font-weight:700}
+.hidden{display:none!important}
+/* توست */
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1e293b;border:1px solid var(--line);color:#fff;padding:11px 18px;border-radius:12px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:300;max-width:88vw;text-align:center}
+#toast.show{opacity:1}
+#toast.err{background:#7f1d1d;border-color:#ef4444}
+</style>
+</head>
+<body>
+
+<!-- صفحه ورود -->
+<div id="gate">
+  <img src="/icon-192.png" alt="">
+  <h2>مینی‌بات کوئیک</h2>
+  <p>اپ مدیریت سریع — فقط برای خودم</p>
+  <input id="gateKey" type="password" placeholder="کلید مدیریت" autocomplete="off">
+  <button id="gateGo">ورود</button>
+</div>
+
+<header class="hidden">
+  <h1>⚡ کوئیک</h1>
+  <select id="serverSwitch" class="hidden"></select>
+  <button class="hbtn" id="installBtn" style="display:none">نصب</button>
+  <button class="hbtn" id="refreshBtn">↻</button>
+</header>
+
+<main>
+  <!-- خانه -->
+  <section class="tab on" id="tab-home">
+    <div id="homeStats" class="row" style="margin-bottom:12px"></div>
+    <div id="homeServers"></div>
+  </section>
+
+  <!-- کاربرها -->
+  <section class="tab" id="tab-users">
+    <div id="userList"></div>
+  </section>
+
+  <!-- درخواست‌ها -->
+  <section class="tab" id="tab-reqs">
+    <div id="reqList"></div>
+  </section>
+
+  <!-- سرورها -->
+  <section class="tab" id="tab-servers">
+    <div id="srvList"></div>
+  </section>
+</main>
+
+<nav class="hidden" id="nav">
+  <button data-tab="home" class="on"><span class="ic">🏠</span>خانه</button>
+  <button data-tab="users"><span class="ic">👥</span>کاربرها<span class="badge hidden" id="uBadge"></span></button>
+  <button data-tab="reqs"><span class="ic">📨</span>درخواست‌ها<span class="badge hidden" id="rBadge"></span></button>
+  <button data-tab="servers"><span class="ic">🛠</span>سرورها</button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+/* ================= ابزارها ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(null==s?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(msg,err){const t=$("toast");t.textContent=msg;t.classList.toggle("err",!!err);t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),err?4200:2600)}
+function fa(ts){if(!ts)return"—";try{return new Date(ts).toLocaleString("fa-IR")}catch(e){return String(ts)}}
+
+/* ================= وضعیت ================= */
+const SERVER_KEY="mq_server",KEY_PREFIX="mq_key_";
+let D={servers:[],users:[],reqs:[],sel:null,health:{}};
+function keyStore(){return KEY_PREFIX+(localStorage.getItem(SERVER_KEY)||"s1")}
+let ADMIN_KEY=localStorage.getItem(keyStore())||"";
+function serverSel(){return localStorage.getItem(SERVER_KEY)||(D.servers[0]?D.servers[0].id:null)}
+function selServer(){return D.servers.find(s=>s.id===serverSel())}
+function selUrl(){const s=selServer();return s?s.url:""}
+
+/* ================= API ================= */
+async function api(path,body,reg){
+  const h={"Content-Type":"application/json","x-admin-key":ADMIN_KEY};
+  if(!reg)h["x-server"]=serverSel()||"";
+  const opt={headers:h};
+  if(body!==undefined){opt.method="POST";opt.body=JSON.stringify(body)}
+  const r=await fetch(path,opt);
+  if(r.status===401)throw new Error("کلید مدیریت نادرست است");
+  return await r.json().catch(()=>({}));
+}
+const regApi=(p,b)=>api(p,b,true);
+
+/* ================= ورود ================= */
+async function tryKey(k){
+  ADMIN_KEY=k.trim();
+  $("gateGo").textContent="...";
+  try{
+    const j=await regApi("/api/admin/check");
+    if(j.ok){
+      localStorage.setItem(keyStore(),ADMIN_KEY);
+      $("gate").classList.add("hidden");
+      document.querySelector("header").classList.remove("hidden");
+      $("nav").classList.remove("hidden");
+      await loadAll();
+      return;
+    }
+    toast("کلید نامعتبر است",1);
+  }catch(e){toast(e.message||"ارتباط برقرار نشد",1)}
+  $("gateGo").textContent="ورود";
+}
+$("gateGo").onclick=()=>tryKey($("gateKey").value);
+$("gateKey").addEventListener("keydown",e=>{"Enter"===e.key&&tryKey($("gateKey").value)});
+
+/* ================= بارگذاری ================= */
+let busy=false;
+async function loadAll(){
+  if(busy)return;busy=true;
+  $("refreshBtn").style.opacity=.4;
+  try{
+    const srvs=await regApi("/api/admin/servers").catch(()=>({servers:[]}));
+    D.servers=(srvs&&srvs.servers)||[];
+    /* اگر سرور ذخیره‌شده دیگر موجود نیست */
+    if(!D.servers.find(s=>s.id===serverSel())&&D.servers.length)
+      localStorage.setItem(SERVER_KEY,D.servers[0].id);
+    const sid=serverSel();
+    const [us,rs]=await Promise.all([
+      sid?api("/api/admin/users").catch(()=>null):null,
+      sid?api("/api/admin/plan-requests").catch(()=>null):null
+    ]);
+    D.users=(us&&us.users)||[];
+    D.reqs=(rs&&rs.requests)||[];
+    pingAll();
+    renderAll();
+  }catch(e){toast(e.message||"خطا در دریافت داده‌ها",1)}
+  $("refreshBtn").style.opacity=1;busy=false;
+}
+$("refreshBtn").onclick=()=>loadAll();
+
+/* پینگ همه سرورها */
+async function pingAll(){
+  for(const s of D.servers){
+    D.health[s.id]="...";
+    try{
+      const j=await fetch(s.url+"/api/health",{cache:"no-store"}).then(r=>r.json());
+      D.health[s.id]=j&&j.ok?("آنلاین — "+j.users+" کاربر"):"خطا";
+    }catch(e){D.health[s.id]="آفلاین"}
+  }
+  renderHome();renderServers();
+}
+
+/* ================= رندر ================= */
+function renderAll(){renderHome();renderUsers();renderReqs();renderServers();fillSwitch();fillBadges()}
+
+function fillSwitch(){
+  const sel=$("serverSwitch");
+  if(D.servers.length<2){sel.style.display="none";return}
+  let h="";for(const s of D.servers)h+='<option value="'+esc(s.id)+'">'+esc(s.name)+"</option>";
+  sel.innerHTML=h;sel.value=serverSel();sel.style.display="inline-block";
+  sel.onchange=()=>{localStorage.setItem(SERVER_SEL(),sel.value);loadAll()};
+}
+function SERVER_SEL(){return SERVER_KEY}
+
+function fillBadges(){
+  const pend=D.reqs.filter(r=>r.status==="pending").length;
+  const rb=$("rBadge");rb.textContent=pend;rb.classList.toggle("hidden",!pend);
+  const off=D.users.filter(u=>!u.connected).length;
+  const ub=$("uBadge");ub.textContent=off;ub.classList.toggle("hidden",!off);
+}
+
+function renderHome(){
+  const sid=serverSel();
+  const tot=D.users.length,con=D.users.filter(u=>u.connected).length;
+  const pend=D.reqs.filter(r=>r.status==="pending").length;
+  $("homeStats").innerHTML=
+    '<div class="card" style="flex:1;text-align:center"><div class="mut">کاربرها</div><div class="big">'+tot+'</div><div class="mut">'+con+' متصل</div></div>'+
+    '<div class="card" style="flex:1;text-align:center"><div class="mut">درخواست معلق</div><div class="big" style="color:'+(pend?"#fcd34d":"#e8eefc")+'">'+pend+'</div><div class="mut">پلن جدید</div></div>';
+  let h="";
+  for(const s of D.servers){
+    const st=D.health[s.id]||"...";
+    const cls=st==="..."?"":(st==="آفلاین"?"err":(st.indexOf("خطا")>-1?"warn":"ok"));
+    h+='<div class="card"><div class="row spread"><span class="srvname">'+(s.id===sid?"⭐ ":"")+esc(s.name)+'</span><span class="chip '+cls+'">'+esc(st)+'</span></div>'
+      +'<div class="mut mono" style="margin-top:6px;word-break:break-all">'+esc(s.url)+'</div>'
+      +(s.note?'<div class="bnote">📝 '+esc(s.note)+'</div>':"")+'</div>';
+  }
+  $("homeServers").innerHTML=h||'<div class="empty">سروری ثبت نشده است</div>';
+}
+
+function renderUsers(){
+  let h="";
+  if(!D.users.length)h='<div class="empty">کاربری نیست</div>';
+  for(const u of D.users){
+    const letter=(u.name||u.username||"?").trim().charAt(0).toUpperCase();
+    const av=u.picture?'<img class="uavatar" src="'+esc(u.picture)+'">':'<div class="uavatar letter">'+esc(letter)+'</div>';
+    const st=u.connected?'<span class="chip ok">متصل</span>':'<span class="chip err">قطع</span>';
+    h+='<div class="card ucard" data-gid="'+esc(u.gid)+'">'
+      +'<div class="uhead">'+av+'<div style="flex:1;min-width:0"><div class="uname">'+esc(u.name||u.username||"بی‌نام")+'</div>'
+      +'<div class="mut" style="margin-top:2px">@'+esc(u.username||"—")+' · '+esc(u.botNumber||"ربات ندارد")+'</div></div>'+st+'</div>'
+      +'<div class="row"><span class="chip '+(u.planExpired?"err":(u.planDaysLeft<=3?"warn":"ok"))+'">'+esc(u.planName)+' · '+u.planDaysLeft+' روز'+(u.planExpired?" (تمام)":(u.planDaysLeft<=3?" (نزدیک)":""))+'</span></div>'
+      +'<div class="ubtns">'
+      +'<button class="pill" data-act="pro">پرو ۳۰ روز</button>'
+      +'<button class="pill" data-act="premium">ویژه ۶۰ روز</button>'
+      +'<button class="pill'+(u.allowDup?" on":"")+'" data-act="dup">ارسال داپ: '+(u.allowDup?"آزاد":"قفل")+'</button>'
+      +'<button class="pill'+(u.allowConfirm?" on":"")+'" data-act="confirm">تأیید مخاطب: '+(u.allowConfirm?"آزاد":"قفل")+'</button>'
+      +'</div></div>';
+  }
+  $("userList").innerHTML=h;
+}
+
+async function userAct(gid,act){
+  const u=D.users.find(x=>x.gid===gid);if(!u)return;
+  try{
+    if(act==="pro"||act==="premium"){
+      if(!confirm("پلن "+(act==="pro"?"«پرو ۳۰ روزه»":"«ویژه ۶۰ روزه»")+" از همین لحظه فعال شود؟"))return;
+      const r=await api("/api/admin/user-plan",{gid,type:act});
+      if(!r.ok)return toast(r.error||"خطا",1);
+      toast("پلن فعال شد ✓");
+    }else if(act==="dup"||act==="confirm"){
+      const patch={gid};
+      patch[act==="dup"?"allowDup":"allowConfirm"]=(act==="dup"?!u.allowDup:!u.allowConfirm);
+      const r=await api("/api/admin/user",patch);
+      if(!r.ok)return toast(r.error||"خطا",1);
+      toast("ذخیره شد ✓");
+    }
+    await loadAll();
+  }catch(e){toast(e.message||"خطا",1)}
+}
+$("userList").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-act]");if(!b)return;
+  const card=b.closest("[data-gid]");if(card)userAct(card.dataset.gid,b.dataset.act);
+});
+
+function renderReqs(){
+  if(!D.reqs.length){$("reqList").innerHTML='<div class="empty">درخواستی نیست</div>';return}
+  let h="";const pend=D.reqs.filter(r=>r.status==="pending"),rest=D.reqs.filter(r=>r.status!=="pending");
+  const card=r=>'<div class="card rq" data-rid="'+esc(r.id)+'" data-gid="'+esc(r.gid)+'">'
+    +'<div class="row spread"><span class="srvname">'+esc(r.name||r.email||"بی‌نام")+'</span><span class="chip">'+esc(r.planName)+'</span></div>'
+    +'<div class="mut" style="margin-top:4px">'+fa(r.at)+' · '+esc(r.method||"")+' · @'+esc(r.email||"")+'</div>'
+    +(r.note?'<div class="note">💬 '+esc(r.note)+'</div>':"")
+    +(r.image?'<img src="'+esc(r.image)+'" alt="رسید">':"")
+    +(r.status==="pending"
+      ?'<div class="row" style="margin-top:10px"><button class="btn ok" data-act="approve">تأیید</button><button class="btn err" data-act="reject">رد</button></div>'
+      :'<div class="mut" style="margin-top:8px">'+(r.status==="approved"?"✅ تأیید شد":"❌ رد شد — "+esc(r.reason))+" · "+fa(r.decidedAt)+'</div>')
+    +'</div>';
+  if(pend.length)h+=pend.map(card).join("");
+  if(rest.length){h+='<div class="mut" style="margin:14px 6px 8px">سابقه</div>'+rest.slice(0,20).map(card).join("")}
+  $("reqList").innerHTML=h;
+}
+
+async function reqAct(rid,act,gid){
+  try{
+    if(act==="approve"){
+      if(!confirm("این درخواست پلن تأیید شود؟"))return;
+      const r=await api("/api/admin/plan-request/approve",{id:rid});
+      if(!r.ok)return toast(r.error||"خطا",1);
+      toast("تأیید شد ✓");
+    }else if(act==="reject"){
+      const reason=prompt("دلیل رد (خالی = بدون دلیل):","")||"";
+      const r=await api("/api/admin/plan-request/reject",{id:rid,reason});
+      if(!r.ok)return toast(r.error||"خطا",1);
+      toast("رد شد");
+    }
+    await loadAll();
+  }catch(e){toast(e.message||"خطا",1)}
+}
+$("reqList").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-act]");if(!b)return;
+  const c=b.closest("[data-rid]");if(c)reqAct(c.dataset.rid,b.dataset.act,c.dataset.gid);
+});
+
+function renderServers(){
+  let h="";
+  if(!D.servers.length)h='<div class="empty">سروری ثبت نشده است</div>';
+  for(const s of D.servers){
+    const st=D.health[s.id]||"...";
+    const cls=st==="..."?"":(st==="آفلاین"?"err":"ok");
+    h+='<div class="card" data-sid="'+esc(s.id)+'">'
+      +'<div class="row spread"><span class="srvname">'+esc(s.name)+'</span><span class="chip '+cls+'">'+esc(st)+'</span></div>'
+      +'<div class="mut mono" style="margin-top:6px;word-break:break-all">'+esc(s.url)+'</div>'
+      +(s.note?'<div class="bnote">📝 '+esc(s.note)+'</div>':"")
+      +'<div class="ubtns">'
+      +'<button class="pill" data-act="test">تست سلامت</button>'
+      +'<button class="pill" data-act="note">یادداشت</button>'
+      +'<button class="pill" data-act="url">آدرس</button>'
+      +'<button class="pill" data-act="ping2">پینگ</button>'
+      +'</div></div>';
+  }
+  $("srvList").innerHTML=h;
+}
+$("srvList").addEventListener("click",async e=>{
+  const b=e.target.closest("button[data-act]");if(!b)return;
+  const card=b.closest("[data-sid]"),sid=card&&card.dataset.sid;if(!sid)return;
+  const s=D.servers.find(x=>x.id===sid);if(!s)return;
+  const act=b.dataset.act;
+  if(act==="test"||act==="ping2"){
+    b.textContent="...";try{const j=await fetch(s.url+"/api/health",{cache:"no-store"}).then(r=>r.json());toast(j.ok?("آنلاین — "+j.users+" کاربر"):"خطای سرور",!j.ok)}catch(_){toast("آفلاین",1)}b.textContent=act==="test"?"تست سلامت":"پینگ";
+  }else if(act==="note"){
+    const nt=prompt("یادداشت این سرور (خالی = حذف):",s.note||"");if(nt===null)return;
+    try{const r=await regApi("/api/admin/servers",{action:"update",id:sid,note:nt});if(!r.ok)return toast(r.error||"خطا",1);toast("یادداشت ذخیره شد ✓");await loadAll()}catch(x){toast(x.message||"خطا",1)}
+  }else if(act==="url"){
+    const u=prompt("آدرس جدید سرور:",s.url);if(u===null)return;
+    if(!/^https:\/\/[a-z0-9.-]+/i.test(u.trim()))return toast("آدرس معتبر نیست",1);
+    try{const r=await regApi("/api/admin/servers",{action:"update",id:sid,url:u.trim()});if(!r.ok)return toast(r.error||"خطا",1);toast("آدرس به‌روز شد ✓");await loadAll()}catch(x){toast(x.message||"خطا",1)}
+  }
+});
+
+/* ================= تب‌ها ================= */
+$("nav").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-tab]");if(!b)return;
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.id==="tab-"+b.dataset.tab));
+});
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("on"));
+document.querySelector('nav button[data-tab="home"]').classList.add("on");
+
+/* ================= PWA نصب ================= */
+let deferredInstall=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e;$("installBtn").style.display="inline-block"});
+$("installBtn").onclick=async()=>{if(deferredInstall){deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;$("installBtn").style.display="none"}};
+window.addEventListener("appinstalled",()=>{deferredInstall=null;$("installBtn").style.display="none";toast("اپ نصب شد ✓")});
+
+/* ================= شروع ================= */
+(async()=>{
+  if(ADMIN_KEY){
+    const j=await regApi("/api/admin/check").catch(()=>null);
+    if(j&&j.ok){
+      $("gate").classList.add("hidden");
+      document.querySelector("header").classList.remove("hidden");
+      $("nav").classList.remove("hidden");
+      await loadAll();
+      return;
+    }
+  }
+  $("gate").classList.remove("hidden");
+})();
+</script>
+</body>
+</html>
